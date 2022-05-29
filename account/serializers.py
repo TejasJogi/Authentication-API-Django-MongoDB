@@ -1,3 +1,5 @@
+from dataclasses import field
+from unittest.util import _MAX_LENGTH
 from rest_framework import serializers
 from account.models import User
 
@@ -11,7 +13,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "password": {'write_only': True}
         }
 
-    def passwordvalidat(self, attrs):
+    def validate(self, attrs):
         password = attrs.get('password')
         password2 = attrs.get('password2')
 
@@ -22,3 +24,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validate_data):
         return User.objects.create_user(**validate_data)
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=50)
+    class Meta:
+        model = User
+        fields = ['email', 'password']
