@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from account.serializers import UserRegisterSerializer, UserLoginSerializer
+from account.serializers import UserRegisterSerializer, UserLoginSerializer, UserUpdateSerializer
 from django.contrib.auth import authenticate
 from account.renderers import Renderer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -56,4 +56,21 @@ class UserLogin(APIView):
             else:
                 return Response({
                     'non_field_errors': 'Email or Password is not Valid'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserUpdate(APIView):
+    renderer_classes = [Renderer]
+    def patch(self, request, format=None):
+        serializer = UserUpdateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.save()
+            return Response({
+                "message": "Update Successfully.",
+                "status": status.HTTP_201_CREATED,
+                "user": {
+                    "username": request.data['username'],
+                    "email": request.data['email'],
+                    "phone": request.data['phone'],
+                }
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

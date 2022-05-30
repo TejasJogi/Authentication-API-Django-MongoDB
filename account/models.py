@@ -42,7 +42,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser):
     username = models.CharField(max_length=200)
-    phone = models.IntegerField()
+    phone = models.CharField(max_length=10)
     email = models.EmailField(
         verbose_name='Email',
         max_length=255,

@@ -1,5 +1,3 @@
-from dataclasses import field
-from unittest.util import _MAX_LENGTH
 from rest_framework import serializers
 from account.models import User
 
@@ -30,3 +28,12 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'password']
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=50)
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'phone']
+
+    def update(self, validate_data):
+        return User.objects.update(**validate_data)
