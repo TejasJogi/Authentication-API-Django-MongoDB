@@ -31,9 +31,11 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50)
+    username = serializers.CharField(max_length=50)
+    phone = serializers.CharField(max_length=10)
     class Meta:
         model = User
         fields = ['username', 'email', 'phone']
 
     def update(self, validate_data):
-        return User.objects.update(**validate_data)
+        return User.objects.create(**validate_data)

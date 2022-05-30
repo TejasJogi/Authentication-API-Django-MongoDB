@@ -5,6 +5,7 @@ from account.serializers import UserRegisterSerializer, UserLoginSerializer, Use
 from django.contrib.auth import authenticate
 from account.renderers import Renderer
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
@@ -60,17 +61,10 @@ class UserLogin(APIView):
 
 class UserUpdate(APIView):
     renderer_classes = [Renderer]
-    def patch(self, request, format=None):
-        serializer = UserUpdateSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
-            return Response({
-                "message": "Update Successfully.",
-                "status": status.HTTP_201_CREATED,
-                "user": {
-                    "username": request.data['username'],
-                    "email": request.data['email'],
-                    "phone": request.data['phone'],
-                }
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [IsAuthenticated]
+    def put(self, request, format=None):
+        serializer = UserUpdateSerializer(data=request.data, context={'user':request.user})
+        serializer.is_valid(raise_exception=True)
+        return Response({
+            "message": "User Update Successfully"
+        }, status=status.HTTP_200_OK)
