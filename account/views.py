@@ -2,7 +2,7 @@ import email
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from account.serializers import UserRegisterSerializer, UserLoginSerializer, UserUpdateSerializer
+from account.serializers import UserDashSerializer, UserRegisterSerializer, UserLoginSerializer
 from django.contrib.auth import authenticate
 from account.renderers import Renderer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -66,24 +66,25 @@ class UserLogin(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserUpdate(APIView):
+class UserDash(APIView):
     renderer_classes = [Renderer]
-    permission_classes = [IsAuthenticated]
 
-    def put(self, request, format=None):
-        serializer = UserUpdateSerializer(data=request.data)
-        print(serializer)
+    def get(self, request, format=None):
+        serializer = UserDashSerializer(request.user) 
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserUpdate(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserRegisterSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        serializer = self.serializer_class(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        try:
-            User.objects.get(email=serializer.validated_data['email'])
-        except:
-            return Response({'message': 'User not found'})
         serializer.save()
-        return Response({
-            "message": "User Update Successfully",
-            "status": status.HTTP_201_CREATED,
-            "user": {
-                "username": request.data['username'],
-                "email": request.data['email'],
-                "phone": request.data['phone'], }
-        }, status=status.HTTP_200_OK)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
